@@ -21,7 +21,14 @@ jobs:
       - name: Build SSH Credentials
         env:
           SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
-        run: eval $(ssh-agent -s) && echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add - > /dev/null
+          ACM_SERVER_ADDRESS: ${{secrets.ACM_SERVER_ADDRESS}}
+        run: |
+          eval $(ssh-agent -s)
+          echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add - > /dev/null
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan ${ACM_SERVER_ADDRESS} >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
       - name: Send data to the server
         env:
           SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
